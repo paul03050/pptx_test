@@ -14,11 +14,15 @@ C_PRIMARY = RGBColor(0x00, 0x6D, 0xFF)
 C_ACCENT = RGBColor(0x00, 0xB4, 0xD8)
 C_LIGHT = RGBColor(0xF0, 0xF4, 0xF8)
 C_WHITE = RGBColor(0xFF, 0xFF, 0xFF)
-C_GRAY = RGBColor(0x6C, 0x75, 0x7D)
+C_GRAY = RGBColor(0xC0, 0xC8, 0xD6)
+C_SECONDARY = RGBColor(0x8A, 0x94, 0xA6)
 C_DARK_TEXT = RGBColor(0x2D, 0x34, 0x3E)
 C_GREEN = RGBColor(0x00, 0xB8, 0x8D)
 C_ORANGE = RGBColor(0xFF, 0x6B, 0x35)
 C_PURPLE = RGBColor(0x7C, 0x3A, 0xED)
+C_CARD_BG = RGBColor(0x2B, 0x30, 0x45)
+
+FONT = "Microsoft JhengHei"
 
 def set_shape_fill(shape, color):
     shape.fill.solid()
@@ -42,18 +46,6 @@ def add_rounded_rect(slide, left, top, width, height, color):
     shape.line.fill.background()
     return shape
 
-def set_text(shape, text, size=18, bold=False, color=C_WHITE, align=PP_ALIGN.LEFT, font_name="Microsoft JhengHei"):
-    tf = shape.text_frame
-    tf.word_wrap = True
-    p = tf.paragraphs[0]
-    p.text = text
-    p.font.size = Pt(size)
-    p.font.bold = bold
-    p.font.color.rgb = color
-    p.font.name = font_name
-    p.alignment = align
-    return tf
-
 def add_textbox(slide, left, top, width, height, text, size=18, bold=False, color=C_WHITE, align=PP_ALIGN.LEFT):
     txBox = slide.shapes.add_textbox(left, top, width, height)
     tf = txBox.text_frame
@@ -63,20 +55,9 @@ def add_textbox(slide, left, top, width, height, text, size=18, bold=False, colo
     p.font.size = Pt(size)
     p.font.bold = bold
     p.font.color.rgb = color
-    p.font.name = "Microsoft JhengHei"
+    p.font.name = FONT
     p.alignment = align
     return tf
-
-def add_bullet_text(tf, text, size=16, color=C_DARK_TEXT, bold=False, level=0, space_before=Pt(6)):
-    p = tf.add_paragraph()
-    p.text = text
-    p.font.size = Pt(size)
-    p.font.color.rgb = color
-    p.font.bold = bold
-    p.font.name = "Microsoft JhengHei"
-    p.level = level
-    p.space_before = space_before
-    return p
 
 def add_accent_bar(slide, left, top, width, height, color):
     return add_rect(slide, left, top, width, height, color)
@@ -84,9 +65,9 @@ def add_accent_bar(slide, left, top, width, height, color):
 def section_header(slide, title, subtitle=""):
     add_bg(slide, C_DARK)
     add_rect(slide, Inches(0), Inches(0), Inches(0.15), Inches(7.5), C_PRIMARY)
-    add_textbox(slide, Inches(1), Inches(2.0), Inches(11), Inches(1.5), title, size=40, bold=True, color=C_WHITE)
+    add_textbox(slide, Inches(1), Inches(0.5), Inches(11), Inches(1.2), title, size=40, bold=True, color=C_WHITE)
     if subtitle:
-        add_textbox(slide, Inches(1), Inches(3.5), Inches(11), Inches(1), subtitle, size=20, color=C_ACCENT)
+        add_textbox(slide, Inches(1), Inches(1.5), Inches(11), Inches(0.8), subtitle, size=24, color=C_ACCENT)
 
 # ════════════════════════════════════════════
 # SLIDE 1: 封面
@@ -106,11 +87,10 @@ add_textbox(slide, Inches(1.2), Inches(3.6), Inches(11), Inches(1.2),
 add_accent_bar(slide, Inches(1.2), Inches(5.0), Inches(3), Inches(0.06), C_PRIMARY)
 
 add_textbox(slide, Inches(1.2), Inches(5.3), Inches(5), Inches(0.5),
-    "2026 年度解決方案提案", size=16, color=C_GRAY)
+    "2026 年度解決方案提案", size=16, color=C_SECONDARY)
 add_textbox(slide, Inches(1.2), Inches(5.9), Inches(5), Inches(0.5),
-    "Powered by AI Agent · Intelligent CRM Suite", size=14, color=C_GRAY)
+    "Powered by AI Agent · Intelligent CRM Suite", size=14, color=C_SECONDARY)
 
-# decoration - right side gradient circles
 for i, (x, r, c) in enumerate([
     (Inches(10.5), Inches(2.5), C_PRIMARY),
     (Inches(11.2), Inches(2.0), C_ACCENT),
@@ -139,17 +119,19 @@ agenda_items = [
     ("08", "合作方案與成功案例", "三種合作模式與參考案例"),
 ]
 
-y_start = Inches(1.0)
 for i, (num, title, desc) in enumerate(agenda_items):
     row = i // 2
     col = i % 2
     x = Inches(0.8 + col * 6.2)
-    y = Inches(1.0 + row * 1.5)
+    y = Inches(2.3 + row * 1.3)
 
-    add_rounded_rect(slide, x, y, Inches(5.8), Inches(1.2), C_PRIMARY if i < 2 else RGBColor(0x24, 0x2A, 0x40))
-    add_textbox(slide, x + Inches(0.3), y + Inches(0.1), Inches(0.8), Inches(1.0), num, size=28, bold=True, color=C_PRIMARY if i >= 2 else C_WHITE, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(1.1), y + Inches(0.05), Inches(4.3), Inches(0.6), title, size=18, bold=True, color=C_WHITE)
-    add_textbox(slide, x + Inches(1.1), y + Inches(0.6), Inches(4.3), Inches(0.5), desc, size=13, color=C_GRAY)
+    is_first = i < 2
+    card_clr = C_PRIMARY if is_first else C_CARD_BG
+    num_clr = C_WHITE if is_first else C_PRIMARY
+    add_rounded_rect(slide, x, y, Inches(5.8), Inches(1.1), card_clr)
+    add_textbox(slide, x + Inches(0.3), y + Inches(0.05), Inches(0.8), Inches(1.0), num, size=28, bold=True, color=num_clr, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(1.1), y + Inches(0.05), Inches(4.3), Inches(0.5), title, size=20, bold=True, color=C_WHITE)
+    add_textbox(slide, x + Inches(1.1), y + Inches(0.55), Inches(4.3), Inches(0.5), desc, size=15, color=C_SECONDARY)
 
 # ════════════════════════════════════════════
 # SLIDE 3: 產業痛點分析
@@ -166,18 +148,18 @@ pain_points = [
 
 for i, (title, desc, color) in enumerate(pain_points):
     x = Inches(0.6 + i * 3.15)
-    y = Inches(1.3)
-    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(3.0), RGBColor(0x24, 0x2A, 0x40))
+    y = Inches(2.3)
+    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.8), C_CARD_BG)
     add_accent_bar(slide, x, y, Inches(2.95), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(0.4), Inches(2.35), Inches(0.5), title, size=22, bold=True, color=color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(1.1), Inches(2.35), Inches(1.6), desc, size=14, color=C_GRAY)
+    add_textbox(slide, x + Inches(0.3), y + Inches(0.4), Inches(2.35), Inches(0.5), title, size=24, bold=True, color=color)
+    add_textbox(slide, x + Inches(0.3), y + Inches(1.1), Inches(2.35), Inches(1.5), desc, size=17, color=C_GRAY)
 
-add_rounded_rect(slide, Inches(0.6), Inches(4.6), Inches(12.1), Inches(2.0), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(1.0), Inches(4.8), Inches(11.3), Inches(0.5),
-    "核心問題：缺乏一個能自主感知、分析、行動的智能中樞來串接 CRM 全流程", size=18, bold=True, color=C_ACCENT)
-add_textbox(slide, Inches(1.0), Inches(5.4), Inches(11.3), Inches(1.0),
+add_rounded_rect(slide, Inches(0.6), Inches(5.4), Inches(12.1), Inches(1.6), C_CARD_BG)
+add_textbox(slide, Inches(1.0), Inches(5.5), Inches(11.3), Inches(0.5),
+    "核心問題：缺乏一個能自主感知、分析、行動的智能中樞來串接 CRM 全流程", size=20, bold=True, color=C_ACCENT)
+add_textbox(slide, Inches(1.0), Inches(6.1), Inches(11.3), Inches(0.7),
     "傳統 CRM 偏重「記錄與查詢」，無法主動服務、預測需求、自動執行任務。AI Agent 正是為了解決這個缺口而生。",
-    size=14, color=C_GRAY)
+    size=16, color=C_GRAY)
 
 # ════════════════════════════════════════════
 # SLIDE 4: 什麼是 AI Agent
@@ -194,21 +176,21 @@ cols = [
 
 for i, (title, desc, color) in enumerate(cols):
     x = Inches(0.6 + i * 3.15)
-    y = Inches(1.3)
-    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.8), RGBColor(0x24, 0x2A, 0x40))
+    y = Inches(2.3)
+    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.5), C_CARD_BG)
     add_accent_bar(slide, x, y, Inches(2.95), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(0.3), Inches(2.35), Inches(0.6), title, size=18, bold=True, color=color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(1.1), Inches(2.35), Inches(1.5), desc, size=13, color=C_GRAY)
+    add_textbox(slide, x + Inches(0.3), y + Inches(0.3), Inches(2.35), Inches(0.6), title, size=20, bold=True, color=color)
+    add_textbox(slide, x + Inches(0.3), y + Inches(1.0), Inches(2.35), Inches(1.4), desc, size=16, color=C_GRAY)
 
-add_rounded_rect(slide, Inches(0.6), Inches(4.4), Inches(12.1), Inches(2.2), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(1.0), Inches(4.6), Inches(11.3), Inches(0.5),
-    "AI Agent vs 傳統 Chatbot", size=20, bold=True, color=C_ACCENT)
+add_rounded_rect(slide, Inches(0.6), Inches(5.1), Inches(12.1), Inches(1.8), C_CARD_BG)
+add_textbox(slide, Inches(1.0), Inches(5.2), Inches(11.3), Inches(0.5),
+    "AI Agent vs 傳統 Chatbot", size=22, bold=True, color=C_ACCENT)
 cmp_data = [
     "傳統 Chatbot：固定腳本 → 只能回答預設問題，超出範圍即轉人工",
     "AI Agent：LLM 驅動 → 理解開放式對話，自主規劃任務並調用工具完成",
 ]
 for i, txt in enumerate(cmp_data):
-    add_textbox(slide, Inches(1.2), Inches(5.2 + i * 0.5), Inches(11), Inches(0.5), txt, size=14, color=C_GRAY)
+    add_textbox(slide, Inches(1.2), Inches(5.8 + i * 0.5), Inches(11), Inches(0.5), f"\U000025b6 {txt}", size=16, color=C_GRAY)
 
 # ════════════════════════════════════════════
 # SLIDE 5: AI Agent + CRM 核心架構
@@ -216,7 +198,6 @@ for i, txt in enumerate(cmp_data):
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 section_header(slide, "AI Agent + CRM 核心架構", "以 CRM 為核心，AI Agent 為智能大腦")
 
-# architecture blocks
 layers = [
     ("\U0001f310 接入層 Touchpoint", "官網 / LINE / Facebook Messenger / WhatsApp / 門市 POS / APP", C_PRIMARY),
     ("\U0001f916 AI Agent 中樞層", "LLM 引擎 · 意圖識別 · 多輪對話 · 任務規劃 · 工具調用", C_PURPLE),
@@ -224,17 +205,17 @@ layers = [
     ("\U0001f4e6 數據與系統層", "ERP / 電商平台 / 物流 / 金流 / Data Warehouse", C_ORANGE),
 ]
 
-y = Inches(1.3)
+y = Inches(2.3)
 for title, desc, color in layers:
-    add_rounded_rect(slide, Inches(0.8), y, Inches(11.7), Inches(1.2), RGBColor(0x24, 0x2A, 0x40))
-    add_accent_bar(slide, Inches(0.8), y, Inches(0.08), Inches(1.2), color)
-    add_textbox(slide, Inches(1.2), y + Inches(0.05), Inches(3), Inches(0.5), title, size=18, bold=True, color=color)
-    add_textbox(slide, Inches(1.2), y + Inches(0.6), Inches(10.5), Inches(0.5), desc, size=14, color=C_GRAY)
-    y += Inches(1.35)
+    add_rounded_rect(slide, Inches(0.8), y, Inches(11.7), Inches(1.0), C_CARD_BG)
+    add_accent_bar(slide, Inches(0.8), y, Inches(0.08), Inches(1.0), color)
+    add_textbox(slide, Inches(1.2), y + Inches(0.05), Inches(3), Inches(0.4), title, size=20, bold=True, color=color)
+    add_textbox(slide, Inches(1.2), y + Inches(0.5), Inches(10.5), Inches(0.5), desc, size=16, color=C_GRAY)
+    y += Inches(1.15)
 
 add_textbox(slide, Inches(0.8), y + Inches(0.2), Inches(11.7), Inches(0.5),
     "\U0001f517 資料流：顧客行為 → AI Agent 感知分析 → CRM 更新標籤/分數 → 觸發自動化行銷/客服行動",
-    size=15, bold=True, color=C_ACCENT, align=PP_ALIGN.CENTER)
+    size=17, bold=True, color=C_ACCENT, align=PP_ALIGN.CENTER)
 
 # ════════════════════════════════════════════
 # SLIDE 6: 電商場景應用
@@ -250,25 +231,25 @@ scenes = [
 
 for i, (title, desc, color) in enumerate(scenes):
     x = Inches(0.5 + i * 4.2)
-    card = add_rounded_rect(slide, x, Inches(1.3), Inches(3.9), Inches(2.6), RGBColor(0x24, 0x2A, 0x40))
-    add_accent_bar(slide, x, Inches(1.3), Inches(3.9), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), Inches(1.5), Inches(3.3), Inches(0.5), title, size=20, bold=True, color=color)
-    add_textbox(slide, x + Inches(0.3), Inches(2.1), Inches(3.3), Inches(1.6), desc, size=13, color=C_GRAY)
+    card = add_rounded_rect(slide, x, Inches(2.3), Inches(3.9), Inches(2.5), C_CARD_BG)
+    add_accent_bar(slide, x, Inches(2.3), Inches(3.9), Inches(0.08), color)
+    add_textbox(slide, x + Inches(0.3), Inches(2.5), Inches(3.3), Inches(0.5), title, size=22, bold=True, color=color)
+    add_textbox(slide, x + Inches(0.3), Inches(3.1), Inches(3.3), Inches(1.5), desc, size=16, color=C_GRAY)
 
-add_rounded_rect(slide, Inches(0.5), Inches(4.1), Inches(12.3), Inches(2.5), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(0.9), Inches(4.3), Inches(11.5), Inches(0.5),
-    "\U0001f3af 實際成效案例", size=18, bold=True, color=C_ACCENT)
+add_rounded_rect(slide, Inches(0.5), Inches(5.1), Inches(12.3), Inches(1.8), C_CARD_BG)
+add_textbox(slide, Inches(0.9), Inches(5.2), Inches(11.5), Inches(0.5),
+    "\U0001f3af 實際成效案例", size=20, bold=True, color=C_ACCENT)
 stats = [
     "某電商導入 AI Agent 客服後，一線問題解決率達 85%，人工客服量降低 62%",
     "個人化推薦引擎上線後，Email 點擊率提升 3.2 倍，平均客單價提升 28%",
     "自動跟單系統使購物車挽回率從 8% 提升至 34%，月增營收 NT$180 萬",
 ]
 for i, txt in enumerate(stats):
-    add_textbox(slide, Inches(1.1), Inches(4.9 + i * 0.5), Inches(11.3), Inches(0.5),
-        f"\U000025b6 {txt}", size=13, color=C_GRAY)
+    add_textbox(slide, Inches(1.1), Inches(5.8 + i * 0.4), Inches(11.3), Inches(0.4),
+        f"\U000025b6 {txt}", size=15, color=C_GRAY)
 
 # ════════════════════════════════════════════
-# SLIDE 7: 零售場景應用
+# SLIDE 7: 實體零售場景應用
 # ════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 section_header(slide, "實體零售場景應用", "Retail Application Scenarios")
@@ -281,25 +262,25 @@ retail_scenes = [
 
 for i, (title, desc, color) in enumerate(retail_scenes):
     x = Inches(0.5 + i * 4.2)
-    card = add_rounded_rect(slide, x, Inches(1.3), Inches(3.9), Inches(2.6), RGBColor(0x24, 0x2A, 0x40))
-    add_accent_bar(slide, x, Inches(1.3), Inches(3.9), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), Inches(1.5), Inches(3.3), Inches(0.5), title, size=20, bold=True, color=color)
-    add_textbox(slide, x + Inches(0.3), Inches(2.1), Inches(3.3), Inches(1.6), desc, size=13, color=C_GRAY)
+    card = add_rounded_rect(slide, x, Inches(2.3), Inches(3.9), Inches(2.5), C_CARD_BG)
+    add_accent_bar(slide, x, Inches(2.3), Inches(3.9), Inches(0.08), color)
+    add_textbox(slide, x + Inches(0.3), Inches(2.5), Inches(3.3), Inches(0.5), title, size=22, bold=True, color=color)
+    add_textbox(slide, x + Inches(0.3), Inches(3.1), Inches(3.3), Inches(1.5), desc, size=16, color=C_GRAY)
 
-add_rounded_rect(slide, Inches(0.5), Inches(4.1), Inches(12.3), Inches(2.5), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(0.9), Inches(4.3), Inches(11.5), Inches(0.5),
-    "\U0001f3af 實際成效案例", size=18, bold=True, color=C_ACCENT)
+add_rounded_rect(slide, Inches(0.5), Inches(5.1), Inches(12.3), Inches(1.8), C_CARD_BG)
+add_textbox(slide, Inches(0.9), Inches(5.2), Inches(11.5), Inches(0.5),
+    "\U0001f3af 實際成效案例", size=20, bold=True, color=C_ACCENT)
 retail_stats = [
     "連鎖藥妝店導入店員助手，結帳含推薦時間平均縮短 40 秒 / 單",
     "智慧庫存系統使缺貨率下降 55%，庫存周轉天數減少 22 天",
     "VIP 進店辨識即時通知店長，VIP 客單消費金額提升 45%",
 ]
 for i, txt in enumerate(retail_stats):
-    add_textbox(slide, Inches(1.1), Inches(4.9 + i * 0.5), Inches(11.3), Inches(0.5),
-        f"\U000025b6 {txt}", size=13, color=C_GRAY)
+    add_textbox(slide, Inches(1.1), Inches(5.8 + i * 0.4), Inches(11.3), Inches(0.4),
+        f"\U000025b6 {txt}", size=15, color=C_GRAY)
 
 # ════════════════════════════════════════════
-# SLIDE 8: 技術架構
+# SLIDE 8: 技術架構與部署方案
 # ════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 section_header(slide, "技術架構與部署方案", "LLM + Agent Framework + CRM 整合")
@@ -313,15 +294,15 @@ tech_items = [
 
 for i, (title, desc, color) in enumerate(tech_items):
     x = Inches(0.6 + i * 3.15)
-    y = Inches(1.3)
-    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.5), RGBColor(0x24, 0x2A, 0x40))
+    y = Inches(2.3)
+    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.2), C_CARD_BG)
     add_accent_bar(slide, x, y, Inches(2.95), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(0.3), Inches(2.35), Inches(0.5), title, size=18, bold=True, color=color)
-    add_textbox(slide, x + Inches(0.3), y + Inches(0.9), Inches(2.35), Inches(1.5), desc, size=13, color=C_GRAY)
+    add_textbox(slide, x + Inches(0.3), y + Inches(0.3), Inches(2.35), Inches(0.5), title, size=20, bold=True, color=color)
+    add_textbox(slide, x + Inches(0.3), y + Inches(0.9), Inches(2.35), Inches(1.2), desc, size=16, color=C_GRAY)
 
-add_rounded_rect(slide, Inches(0.6), Inches(4.1), Inches(12.1), Inches(2.5), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(1.0), Inches(4.3), Inches(11.3), Inches(0.5),
-    "\U0001f6e1 資安與合規", size=18, bold=True, color=C_ACCENT)
+add_rounded_rect(slide, Inches(0.6), Inches(4.8), Inches(12.1), Inches(2.2), C_CARD_BG)
+add_textbox(slide, Inches(1.0), Inches(4.9), Inches(11.3), Inches(0.5),
+    "\U0001f6e1 資安與合規", size=20, bold=True, color=C_ACCENT)
 security = [
     "數據加密：傳輸 TLS 1.3 + 靜態 AES-256 加密",
     "合規支援：符合 GDPR / CCPA / 台灣個資法規範",
@@ -329,10 +310,10 @@ security = [
     "權限控管：RBAC 角色權限 + 操作審計日誌 + 資料脫敏處理",
 ]
 for i, txt in enumerate(security):
-    add_textbox(slide, Inches(1.2), Inches(4.9 + i * 0.4), Inches(11), Inches(0.4), f"\U000025b6 {txt}", size=13, color=C_GRAY)
+    add_textbox(slide, Inches(1.2), Inches(5.5 + i * 0.4), Inches(11), Inches(0.4), f"\U000025b6 {txt}", size=15, color=C_GRAY)
 
 # ════════════════════════════════════════════
-# SLIDE 9: 導入效益
+# SLIDE 9: 導入效益分析
 # ════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 section_header(slide, "導入效益分析", "量化指標與預期成果")
@@ -346,24 +327,23 @@ metrics = [
 
 for i, (num, title, desc, color) in enumerate(metrics):
     x = Inches(0.6 + i * 3.15)
-    y = Inches(1.3)
-    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.8), RGBColor(0x24, 0x2A, 0x40))
+    y = Inches(2.3)
+    card = add_rounded_rect(slide, x, y, Inches(2.95), Inches(2.5), C_CARD_BG)
     add_accent_bar(slide, x, y, Inches(2.95), Inches(0.08), color)
     add_textbox(slide, x + Inches(0.2), y + Inches(0.3), Inches(2.55), Inches(1.0), num, size=48, bold=True, color=color, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.2), y + Inches(1.4), Inches(2.55), Inches(0.5), title, size=18, bold=True, color=C_WHITE, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.2), y + Inches(1.9), Inches(2.55), Inches(0.6), desc, size=12, color=C_GRAY, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(0.2), y + Inches(1.3), Inches(2.55), Inches(0.5), title, size=20, bold=True, color=C_WHITE, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(0.2), y + Inches(1.8), Inches(2.55), Inches(0.5), desc, size=15, color=C_GRAY, align=PP_ALIGN.CENTER)
 
-# ROI estimate
-add_rounded_rect(slide, Inches(0.6), Inches(4.4), Inches(12.1), Inches(2.2), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(1.0), Inches(4.6), Inches(11.3), Inches(0.5),
-    "\U0001f4b0 投資回報預估（以年營收 NT$5,000 萬之電商為例）", size=18, bold=True, color=C_ACCENT)
+add_rounded_rect(slide, Inches(0.6), Inches(5.1), Inches(12.1), Inches(1.8), C_CARD_BG)
+add_textbox(slide, Inches(1.0), Inches(5.2), Inches(11.3), Inches(0.5),
+    "\U0001f4b0 投資回報預估（以年營收 NT$5,000 萬之電商為例）", size=20, bold=True, color=C_ACCENT)
 roi = [
     "人力節省：減少 4-6 名客服人員 → 年省約 NT$200-300 萬",
     "營收增長：購物車挽回 + 個人化推薦 → 年增營收 NT$500-800 萬",
     "IT 成本：方案費用約 NT$60-150 萬/年 → ROI 首年即可達 3-5 倍",
 ]
 for i, txt in enumerate(roi):
-    add_textbox(slide, Inches(1.2), Inches(5.2 + i * 0.4), Inches(11), Inches(0.4), f"\U000025b6 {txt}", size=14, color=C_GRAY)
+    add_textbox(slide, Inches(1.2), Inches(5.8 + i * 0.4), Inches(11), Inches(0.4), f"\U000025b6 {txt}", size=16, color=C_GRAY)
 
 # ════════════════════════════════════════════
 # SLIDE 10: 合作方案
@@ -379,12 +359,12 @@ plans = [
 
 for i, (title, price, features, color, note) in enumerate(plans):
     x = Inches(0.5 + i * 4.2)
-    card = add_rounded_rect(slide, x, Inches(1.3), Inches(3.9), Inches(4.8), RGBColor(0x24, 0x2A, 0x40))
-    add_accent_bar(slide, x, Inches(1.3), Inches(3.9), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), Inches(1.5), Inches(3.3), Inches(0.5), title, size=22, bold=True, color=color, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.3), Inches(2.0), Inches(3.3), Inches(0.5), price, size=24, bold=True, color=C_WHITE, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.3), Inches(2.5), Inches(3.3), Inches(2.2), features, size=13, color=C_GRAY)
-    add_textbox(slide, x + Inches(0.3), Inches(4.8), Inches(3.3), Inches(0.8), note, size=12, color=C_ACCENT, align=PP_ALIGN.CENTER)
+    card = add_rounded_rect(slide, x, Inches(2.3), Inches(3.9), Inches(4.5), C_CARD_BG)
+    add_accent_bar(slide, x, Inches(2.3), Inches(3.9), Inches(0.08), color)
+    add_textbox(slide, x + Inches(0.3), Inches(2.5), Inches(3.3), Inches(0.5), title, size=22, bold=True, color=color, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(0.3), Inches(3.0), Inches(3.3), Inches(0.5), price, size=26, bold=True, color=C_WHITE, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(0.3), Inches(3.6), Inches(3.3), Inches(1.8), features, size=16, color=C_GRAY)
+    add_textbox(slide, x + Inches(0.3), Inches(5.6), Inches(3.3), Inches(0.8), note, size=14, color=C_ACCENT, align=PP_ALIGN.CENTER)
 
 # ════════════════════════════════════════════
 # SLIDE 11: 成功案例
@@ -403,16 +383,16 @@ cases = [
 
 for i, (title, desc, result, color) in enumerate(cases):
     x = Inches(0.5 + i * 4.2)
-    card = add_rounded_rect(slide, x, Inches(1.3), Inches(3.9), Inches(3.5), RGBColor(0x24, 0x2A, 0x40))
-    add_accent_bar(slide, x, Inches(1.3), Inches(3.9), Inches(0.08), color)
-    add_textbox(slide, x + Inches(0.3), Inches(1.5), Inches(3.3), Inches(0.5), title, size=20, bold=True, color=color, align=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.3), Inches(2.1), Inches(3.3), Inches(1.0), desc, size=13, color=C_GRAY)
-    add_textbox(slide, x + Inches(0.3), Inches(3.2), Inches(3.3), Inches(1.3), result, size=13, bold=True, color=C_ACCENT)
+    card = add_rounded_rect(slide, x, Inches(2.3), Inches(3.9), Inches(3.2), C_CARD_BG)
+    add_accent_bar(slide, x, Inches(2.3), Inches(3.9), Inches(0.08), color)
+    add_textbox(slide, x + Inches(0.3), Inches(2.5), Inches(3.3), Inches(0.5), title, size=22, bold=True, color=color, align=PP_ALIGN.CENTER)
+    add_textbox(slide, x + Inches(0.3), Inches(3.1), Inches(3.3), Inches(1.0), desc, size=15, color=C_GRAY)
+    add_textbox(slide, x + Inches(0.3), Inches(4.2), Inches(3.3), Inches(1.0), result, size=15, bold=True, color=C_ACCENT)
 
-add_rounded_rect(slide, Inches(0.5), Inches(5.1), Inches(12.3), Inches(1.5), RGBColor(0x24, 0x2A, 0x40))
-add_textbox(slide, Inches(0.9), Inches(5.3), Inches(11.5), Inches(1.0),
+add_rounded_rect(slide, Inches(0.5), Inches(5.8), Inches(12.3), Inches(1.3), C_CARD_BG)
+add_textbox(slide, Inches(0.9), Inches(5.9), Inches(11.5), Inches(1.0),
     "\U0001f4ac 「導入 AI Agent 後，我們的客服團隊從被動接電話轉為主動經營會員關係，這是過去五年最有價值的技術投資。」\n— 某大型零售集團 IT 副總",
-    size=14, color=C_GRAY)
+    size=15, color=C_GRAY)
 
 # ════════════════════════════════════════════
 # SLIDE 12: 結語
@@ -427,7 +407,7 @@ add_textbox(slide, Inches(1.2), Inches(2.2), Inches(11), Inches(1.2),
     "讓 AI Agent 成為您\nCRM 的智慧大腦", size=44, bold=True, color=C_WHITE)
 add_accent_bar(slide, Inches(1.2), Inches(3.6), Inches(3), Inches(0.06), C_PRIMARY)
 
-add_rounded_rect(slide, Inches(1.2), Inches(4.0), Inches(10.9), Inches(2.0), RGBColor(0x24, 0x2A, 0x40))
+add_rounded_rect(slide, Inches(1.2), Inches(4.0), Inches(10.9), Inches(2.0), C_CARD_BG)
 next_steps = [
     "\U0001f4ac Step 1：免費諮詢 — 了解貴公司現況與需求（約 1 小時）",
     "\U0001f4cb Step 2：POC 證明 — 選定一個場景進行 2 週概念驗證",
@@ -438,11 +418,10 @@ for i, txt in enumerate(next_steps):
     add_textbox(slide, Inches(1.5), Inches(4.2 + i * 0.4), Inches(10.3), Inches(0.4), txt, size=16, color=C_GRAY)
 
 add_textbox(slide, Inches(1.2), Inches(6.3), Inches(5), Inches(0.4),
-    "聯絡我們：contact@aiagent-crm.com", size=14, color=C_GRAY)
+    "聯絡我們：contact@aiagent-crm.com", size=14, color=C_SECONDARY)
 add_textbox(slide, Inches(1.2), Inches(6.7), Inches(5), Inches(0.4),
-    "官網：www.aiagent-crm.com", size=14, color=C_GRAY)
+    "官網：www.aiagent-crm.com", size=14, color=C_SECONDARY)
 
-# decoration
 circle2 = slide.shapes.add_shape(MSO_SHAPE.OVAL, Inches(10.5), Inches(1.5), Inches(2.0), Inches(2.0))
 circle2.fill.solid()
 circle2.fill.fore_color.rgb = C_PRIMARY
